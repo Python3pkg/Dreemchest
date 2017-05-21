@@ -47,15 +47,15 @@ def panorama_to_cross(src, output):
     out_pix = output.load()
     edge = in_size[0] / 4   # the length of each edge in pixels
 
-    for i in xrange(out_size[0]):
+    for i in range(out_size[0]):
         face = int(i/edge)  # 0 - back, 1 - left 2 - front, 3 - right
-        print '\r\tprocessing %d/%d' % (i, out_size[0]),
+        print('\r\tprocessing %d/%d' % (i, out_size[0]), end=' ')
         sys.stdout.flush()
 
         if face == 2:
-            rng = xrange(0, edge * 3)
+            rng = range(0, edge * 3)
         else:
-            rng = xrange(edge, edge * 2)
+            rng = range(edge, edge * 2)
 
         for j in rng:
             if j < edge:

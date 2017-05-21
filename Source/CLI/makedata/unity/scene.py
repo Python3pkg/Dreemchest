@@ -24,7 +24,7 @@
 #
 #################################################################################
 
-import yaml, patcher
+from . import yaml, patcher
 
 # Holds the info about a single scene
 class Scene:
@@ -57,9 +57,9 @@ class Scene:
         particles = {}
 
         # Collect all mesh filters & particle renderers
-        for id, object in objects.items():
+        for id, object in list(objects.items()):
             # Get the object type
-            type = [key for key in object.keys() if key != 'id'][0]
+            type = [key for key in list(object.keys()) if key != 'id'][0]
 
             # Skip objects with no m_GameObject reference
             if 'm_GameObject' not in object[type]:
@@ -75,9 +75,9 @@ class Scene:
                 particles[sceneObject] = object[type]['m_Materials'][0]['guid']
 
         # Patch objects
-        for id, object in objects.items():
+        for id, object in list(objects.items()):
             # Get the object type
-            type = [key for key in object.keys() if key != 'id'][0]
+            type = [key for key in list(object.keys()) if key != 'id'][0]
 
             # Should we skip this type
             if not type in types:
@@ -96,7 +96,7 @@ class Scene:
                 data['material'] = self._assets.use(particles[sceneObject])
 
             # Remove properties with None values
-            for k, v in data.items():
+            for k, v in list(data.items()):
                if v is None:
                   del data[k]
 

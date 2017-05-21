@@ -34,5 +34,5 @@ def require(module, required=False):
         if required:
             raise Exception("Error: the required module '{0}' not found.".format(module))
 
-        print "Warning: '{0}' module not found".format(module)
+        print("Warning: '{0}' module not found".format(module))
         return None

@@ -130,11 +130,11 @@ class BootstrapCommand(cmake.Command):
         git.checkout_submodules()
 
         if self.env.emscripten is None:
-            print "Warning: '%s' environment variable is not set, Emscripten is disabled." % env.DREEMCHEST_EMSCRIPTEN
+            print("Warning: '%s' environment variable is not set, Emscripten is disabled." % env.DREEMCHEST_EMSCRIPTEN)
             options.no_emscripten = True
 
         if self.env.android is None:
-            print "Warning: '%s' environment variable is not set, Android is disabled." % env.DREEMCHEST_ANDROID
+            print("Warning: '%s' environment variable is not set, Android is disabled." % env.DREEMCHEST_ANDROID)
             options.no_android = True
 
         # Now build each platform
@@ -153,15 +153,15 @@ class BootstrapCommand(cmake.Command):
             # Build all external libraries
             for external in self.externals:
                 name = external['name']
-                cmake_options = external['options'] if 'options' in external.keys() else dict()
-                source = external['source'] if 'source' in external.keys() else name
+                cmake_options = external['options'] if 'options' in list(external.keys()) else dict()
+                source = external['source'] if 'source' in list(external.keys()) else name
                 platform_name = platform.lower()
-                platform_options = external[platform_name] if platform_name in external.keys() else dict()
+                platform_options = external[platform_name] if platform_name in list(external.keys()) else dict()
 
-                if 'disabled' in platform_options.keys() and platform_options['disabled']:
+                if 'disabled' in list(platform_options.keys()) and platform_options['disabled']:
                     continue
 
-                if 'options' in platform_options.keys():
+                if 'options' in list(platform_options.keys()):
                     cmake_options.update(platform_options['options'])
 
                 cmake_options.update(self.platform_options(platform))

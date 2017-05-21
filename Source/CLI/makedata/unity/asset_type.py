@@ -54,7 +54,7 @@ class AssetType:
     def map_from_file_name(file_name):
         ext = os.path.splitext(file_name)[1][1:].lower()
 
-        if ext in AssetType.Extensions.keys():
+        if ext in list(AssetType.Extensions.keys()):
             return AssetType.Extensions[ext]
 
         return AssetType.UNKNOWN

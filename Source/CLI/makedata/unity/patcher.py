@@ -25,7 +25,7 @@
 #################################################################################
 
 import math
-from parameter import ParameterType, Curve, Gradient, Rgba
+from .parameter import ParameterType, Curve, Gradient, Rgba
 
 # Patches the object properties
 class Patcher:
@@ -88,7 +88,7 @@ class Patcher:
             value = object[property]
 
             if isinstance(value, dict):
-                object[self.name] =  assets.use(value['guid']) if 'guid' in value.keys() else None
+                object[self.name] =  assets.use(value['guid']) if 'guid' in list(value.keys()) else None
             else:
                 object[self.name] = [assets.use(item['guid']) for item in value]
 
@@ -119,7 +119,7 @@ class Patcher:
             result = []
 
             for coord in self.coords:
-                if coord in value.keys(): result.append(float(value[coord]))
+                if coord in list(value.keys()): result.append(float(value[coord]))
 
             object[self.name] = result
             del object[property]
@@ -187,7 +187,7 @@ class Patcher:
             min.parse(value['minGradient'])
             max.parse(value['maxGradient'])
 
-            assert 'transparency' not in object.keys()
+            assert 'transparency' not in list(object.keys())
 
             if type == ParameterType.CURVE:
                 object[self._color_name] = dict(type="curve", value=max.rgb)
@@ -247,23 +247,23 @@ class Patcher:
                 key = prop['first']['name']
                 value = {}
 
-                if key in self.patchers.keys():
+                if key in list(self.patchers.keys()):
                     value[key] = prop['second']
                     value = Patcher.patch(assets, value, self.patchers)
-                    result[value.keys()[0]] = value[value.keys()[0]]
+                    result[list(value.keys())[0]] = value[list(value.keys())[0]]
 
             object[self.name] = result
             del object[property]
 
     @staticmethod
     def patch(assets, object, patchers):
-        object_items = object.items()
+        object_items = list(object.items())
 
-        if '' in patchers.keys():
+        if '' in list(patchers.keys()):
             patchers[''](assets, object, '')
 
         for name, value in object_items:
-            if name in patchers.keys():
+            if name in list(patchers.keys()):
                 patchers[name](assets, object, name)
             else:
                 del object[name]

@@ -91,7 +91,7 @@ class CMake:
             self.build_tree(binary_dir, target=target, configuration=configuration, rest=rest)
 
         except subprocess.CalledProcessError:
-            print 'Failed to build %s' % source_dir
+            print('Failed to build %s' % source_dir)
 
         shutil.rmtree(binary_dir)
 

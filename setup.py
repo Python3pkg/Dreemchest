@@ -27,7 +27,7 @@
 import argparse
 import sys
 import os
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import tarfile
 import zipfile
 import subprocess
@@ -60,7 +60,7 @@ def platform_name():
 def env_variable(name):
     """Returns an environment variable value if it exists, otherwise returns None"""
 
-    if name in os.environ.keys():
+    if name in list(os.environ.keys()):
         return os.environ[name]
 
     return None
@@ -141,13 +141,13 @@ class UnixEnvironment(Environment):
         """Writes an environment variable to bash configuration file"""
 
         self._append_to_bash('export {name}={value}\n'.format(name=name, value=value))
-        print 'Environment variable {name} was set to {value}'.format(name=name, value=value)
+        print('Environment variable {name} was set to {value}'.format(name=name, value=value))
 
     def add_path(self, path):
         """Writes path export to bash configuration file"""
 
         self._append_to_bash('export PATH={path}:$PATH\n'.format(path=path))
-        print 'Path {path} added to environment'.format(path=path)
+        print('Path {path} added to environment'.format(path=path))
 
     def uninstall(self):
         """Cleans up previous environment configuration"""
@@ -201,19 +201,19 @@ class WindowsEnvironment(Environment):
 
     def set_variable(self, name, value):
         """Sets an environment variable"""
-        import _winreg
+        import winreg
         try:
             env = None
-            env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER,
+            env = winreg.OpenKeyEx(winreg.HKEY_CURRENT_USER,
                                     'Environment',
                                     0,
-                                    _winreg.KEY_SET_VALUE | _winreg.KEY_READ)
-            _winreg.SetValueEx(env, name, 0, _winreg.REG_SZ, value)
-            _winreg.FlushKey(env)
-            _winreg.CloseKey(env)
+                                    winreg.KEY_SET_VALUE | winreg.KEY_READ)
+            winreg.SetValueEx(env, name, 0, winreg.REG_SZ, value)
+            winreg.FlushKey(env)
+            winreg.CloseKey(env)
         except Exception:
             if env:
-                _winreg.CloseKey(env)
+                winreg.CloseKey(env)
             raise Exception("failed to set '%s' environment variable" % name)
 
     def configure(self, paths):
@@ -236,7 +236,7 @@ class WindowsEnvironment(Environment):
         self._path += path
 
         self.set_variable('PATH', self._path)
-        print 'Path {path} added to environment'.format(path=path)
+        print('Path {path} added to environment'.format(path=path))
 
 
 def configure_environment(args, paths):
@@ -245,7 +245,7 @@ def configure_environment(args, paths):
 
     name = platform_name()
 
-    if name not in environments.keys():
+    if name not in list(environments.keys()):
         raise Exception('unsupported platform')
 
     environment = environments[name](args)
@@ -256,12 +256,12 @@ def configure_environment(args, paths):
 
 def download(url, file_name):
     """Downloads a file from a specified remote URL"""
-    u = urllib2.urlopen(url)
+    u = urllib.request.urlopen(url)
 
     f = open(file_name, 'wb')
     meta = u.info()
     file_size = int(meta.getheaders("Content-Length")[0])
-    print "Downloading: %s Bytes: %s" % (url, file_size)
+    print("Downloading: %s Bytes: %s" % (url, file_size))
 
     file_size_dl = 0
     block_sz = 8192
@@ -273,10 +273,10 @@ def download(url, file_name):
         file_size_dl += len(dl_buffer)
         f.write(dl_buffer)
         status = "\r%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-        print status,
+        print(status, end=' ')
         sys.stdout.flush()
 
-    print '\n'
+    print('\n')
     f.close()
 
 
@@ -301,7 +301,7 @@ def extract(file_name, path, directory=None, preserve_permissions=True):
             out_path = os.path.join(extract_dir, info.filename)
 
             if preserve_permissions:
-                perm = info.external_attr >> 16L
+                perm = info.external_attr >> 16
                 os.chmod(out_path, perm)
 
         with zipfile.ZipFile(file_name, "r") as z:
@@ -366,7 +366,7 @@ def invoke(command):
 
 def install_cmake(version):
     # Skip CMake installation if we already have a valid installation
-    if DREEMCHEST_CMAKE_BIN in os.environ.keys():
+    if DREEMCHEST_CMAKE_BIN in list(os.environ.keys()):
         try:
             cmake_bin = os.environ[DREEMCHEST_CMAKE_BIN]
             cmake_command = os.path.join(cmake_bin, 'cmake --version')
@@ -379,14 +379,14 @@ def install_cmake(version):
             cmake_version = cmake_version.strip()
 
             if cmake_version == version:
-                print 'Found existing CMake %s executable at %s' % (cmake_version, cmake_bin)
+                print('Found existing CMake %s executable at %s' % (cmake_version, cmake_bin))
                 return os.environ[DREEMCHEST_CMAKE]
 
-            print 'Found CMake %s, but %s was requested, downloading the required version...' % (cmake_version, version)
+            print('Found CMake %s, but %s was requested, downloading the required version...' % (cmake_version, version))
         except subprocess.CalledProcessError:
-            print "Warning: 'DREEMCHEST_CMAKE' variable points to an invalid folder"
+            print("Warning: 'DREEMCHEST_CMAKE' variable points to an invalid folder")
         except Exception as err:
-            print "Warning: %s" % err
+            print("Warning: %s" % err)
 
     # Download and extract CMake
     return download_cmake(version)
@@ -394,20 +394,20 @@ def install_cmake(version):
 
 def install_android(version, api_levels, architectures):
     # Skip Android SDK installation if we already have a valid installation
-    if DREEMCHEST_ANDROID in os.environ.keys():
-        print 'Android SDK installation found at %s' % os.environ[DREEMCHEST_ANDROID]
+    if DREEMCHEST_ANDROID in list(os.environ.keys()):
+        print('Android SDK installation found at %s' % os.environ[DREEMCHEST_ANDROID])
         return os.environ[DREEMCHEST_ANDROID]
 
-    if ANDROID_HOME in os.environ.keys():
-        print 'Android SDK installation found at %s' % os.environ[ANDROID_HOME]
+    if ANDROID_HOME in list(os.environ.keys()):
+        print('Android SDK installation found at %s' % os.environ[ANDROID_HOME])
         return os.environ[ANDROID_HOME]
 
-    if ANDROID_SDK_HOME in os.environ.keys():
-        print 'Android SDK installation found at %s' % os.environ[ANDROID_SDK_HOME]
+    if ANDROID_SDK_HOME in list(os.environ.keys()):
+        print('Android SDK installation found at %s' % os.environ[ANDROID_SDK_HOME])
         return os.environ[ANDROID_SDK_HOME]
 
-    if ANDROID_SDK_ROOT in os.environ.keys():
-        print 'Android SDK installation found at %s' % os.environ[ANDROID_SDK_ROOT]
+    if ANDROID_SDK_ROOT in list(os.environ.keys()):
+        print('Android SDK installation found at %s' % os.environ[ANDROID_SDK_ROOT])
         return os.environ[ANDROID_SDK_ROOT]
 
     # Download an Android SDK
@@ -435,23 +435,23 @@ def install_android(version, api_levels, architectures):
 
     # Install all required packages
     for api_level in api_levels:
-        print 'Installing Android API level %s...' % api_level
+        print('Installing Android API level %s...' % api_level)
         if not invoke(sdk_manager + ' "platforms;android-%s"' % api_level):
             raise Exception('Failed to install Android API level %s' % api_level)
 
         for arch in architectures:
-            print 'Installing Android system image for %s architecture with API level %s' % (arch, api_level)
+            print('Installing Android system image for %s architecture with API level %s' % (arch, api_level))
             invoke(sdk_manager + ' "system-images;android-%s;default;%s"' % (api_level, arch))
 
-    print 'Installing Android tools...'
+    print('Installing Android tools...')
     if not invoke(sdk_manager + ' tools'):
         raise Exception('Failed to install Android tools')
 
-    print 'Installing Android platform tools...'
+    print('Installing Android platform tools...')
     if not invoke(sdk_manager + ' platform-tools'):
         raise Exception('Failed to install Android platform tools')
 
-    print 'Installing Android NDK...'
+    print('Installing Android NDK...')
     if not invoke(sdk_manager + ' ndk-bundle'):
         raise Exception('Failed to install an Android NDK')
 
@@ -460,12 +460,12 @@ def install_android(version, api_levels, architectures):
 
 def install_emscripten(version):
     # Skip Android SDK installation if we already have a valid installation
-    if DREEMCHEST_EMSCRIPTEN in os.environ.keys():
-        print 'Emscripten installation found at %s' % os.environ[DREEMCHEST_EMSCRIPTEN]
+    if DREEMCHEST_EMSCRIPTEN in list(os.environ.keys()):
+        print('Emscripten installation found at %s' % os.environ[DREEMCHEST_EMSCRIPTEN])
         return os.environ[DREEMCHEST_EMSCRIPTEN]
 
-    if EMSCRIPTEN in os.environ.keys():
-        print 'Emscripten installation found at %s' % os.environ[EMSCRIPTEN]
+    if EMSCRIPTEN in list(os.environ.keys()):
+        print('Emscripten installation found at %s' % os.environ[EMSCRIPTEN])
         return os.environ[EMSCRIPTEN]
 
     platform = platform_name()
@@ -491,7 +491,7 @@ def install_emscripten(version):
 
     # Install Emscripten SDK
     emsdk = os.path.join(emscripten_home, 'emsdk')
-    print 'Installing Emscripten SDK...'
+    print('Installing Emscripten SDK...')
     invoke(emsdk + ' update')
     invoke(emsdk + ' install latest')
     invoke(emsdk + ' activate latest')
@@ -509,7 +509,7 @@ def install_emscripten(version):
 def install_yaml():
     try:
         import yaml
-        print 'Found existing PyYAML installation'
+        print('Found existing PyYAML installation')
     except:
         url = 'http://pyyaml.org/download/pyyaml/PyYAML-3.12.zip'
         file_name = url.split('/')[-1]
@@ -549,7 +549,7 @@ def main():
     args = parser.parse_args()
 
     if env_variable('JAVA_HOME') is None:
-        print 'Warning: JAVA_HOME environment variable is not set, disabling Android SDK installation'
+        print('Warning: JAVA_HOME environment variable is not set, disabling Android SDK installation')
         args.no_android = True
 
     # Install YAML
@@ -579,4 +579,4 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print 'Error: %s' % e
+        print('Error: %s' % e)

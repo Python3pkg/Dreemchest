@@ -25,7 +25,7 @@
 #################################################################################
 
 import collections, os, yaml
-from asset_type import AssetType
+from .asset_type import AssetType
 
 # The single project asset
 class Asset:
@@ -106,7 +106,7 @@ class Assets:
 
         # Append used assets
         result = []
-        for guid, item in self.used_assets.items():
+        for guid, item in list(self.used_assets.items()):
             result.append(dict(identifier=item.identifier, uuid=self.asset_identifier(item), type=item.type))
 
         # Append scenes
@@ -121,7 +121,7 @@ class Assets:
 
     # Parses the project assets
     def parse(self):
-        print('Parsing assets from {0}'.format(self._path))
+        print(('Parsing assets from {0}'.format(self._path)))
 
         for folder, dirs, files in os.walk(os.path.join(self._path, 'Assets')):
             for file in files:
@@ -132,7 +132,7 @@ class Assets:
                     meta = yaml.from_file(full_path)
                     self._files[meta['guid']] = Asset(name, os.path.relpath(os.path.join(folder, name), self._path), meta)
 
-        print('{0} assets parsed'.format(len(self._files)))
+        print(('{0} assets parsed'.format(len(self._files))))
 
     # Marks an asset as used
     def use(self, uuid):
@@ -141,18 +141,18 @@ class Assets:
 
         asset = self._files[uuid]
 
-        if not uuid in self._used_assets.keys():
+        if not uuid in list(self._used_assets.keys()):
             self._used_assets[uuid] = asset
 
         return self.asset_identifier(asset)
 
     # Returns the asset by an UUID and marks it as used
     def resolve(self, guid):
-        if guid in self._files.keys():
+        if guid in list(self._files.keys()):
             file = self._files[guid]
 
-            if not guid in self._usedAssets.keys():
-                print(file.fullPath, 'used')
+            if not guid in list(self._usedAssets.keys()):
+                print((file.fullPath, 'used'))
                 self._usedAssets[guid] = file
 
             return file
@@ -161,12 +161,12 @@ class Assets:
 
     # Returns an array of assets filtered by type
     def filter_by_type(self, type):
-        return [v for k, v in self._files.items() if v.type == type]
+        return [v for k, v in list(self._files.items()) if v.type == type]
 
     # Returns an array of used assets filtered by type
     def used_by_type(self, *types):
         result = []
-        for k, v in self._usedAssets.items():
+        for k, v in list(self._usedAssets.items()):
             if v.type in types:
                 result.append( v )
         return result
@@ -176,4 +176,4 @@ class Assets:
         if not self._strip_unused:
             return False
 
-        return asset.uuid not in self.used_assets.keys()
+        return asset.uuid not in list(self.used_assets.keys())

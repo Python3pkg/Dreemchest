@@ -51,13 +51,13 @@ class Configuration:
     """An active environment configuration"""
     def __init__(self):
         # Load home directory
-        if DREEMCHEST_HOME not in os.environ.keys():
+        if DREEMCHEST_HOME not in list(os.environ.keys()):
             raise Exception("'%s' environment variable should point to a Dreemchest home directory." % DREEMCHEST_HOME)
 
         self.home = os.environ[DREEMCHEST_HOME]
 
         # Load CMake directory
-        if DREEMCHEST_CMAKE_BIN not in os.environ.keys():
+        if DREEMCHEST_CMAKE_BIN not in list(os.environ.keys()):
             raise Exception("'%s' environment variable should point to a CMake directory." % DREEMCHEST_CMAKE_BIN)
 
         self._cmake = os.environ[DREEMCHEST_CMAKE_BIN]
@@ -65,13 +65,13 @@ class Configuration:
         # Load Android SDK directory
         self._android = None
 
-        if DREEMCHEST_ANDROID in os.environ.keys():
+        if DREEMCHEST_ANDROID in list(os.environ.keys()):
             self._android = os.environ[DREEMCHEST_ANDROID]
 
         # Load Emscripten SDK directory
         self._emscripten = None
 
-        if DREEMCHEST_EMSCRIPTEN in os.environ.keys():
+        if DREEMCHEST_EMSCRIPTEN in list(os.environ.keys()):
             self._emscripten = os.environ[DREEMCHEST_EMSCRIPTEN]
 
     @property

@@ -31,7 +31,7 @@ Item = collections.namedtuple('Item', ['path', 'info'])
 
 # Scans the directory recursively and returns the list of outdated files
 def find_outdated(path):
-    print('Scanning', path)
+    print(('Scanning', path))
 
     result = {}
 
@@ -49,17 +49,17 @@ def find_outdated(path):
 
 # Generates the manifest from files
 def generate_manifest(files):
-    assets = [item.info for k, item in files.items()]
+    assets = [item.info for k, item in list(files.items())]
     return json.dumps(assets)
 
 # Builds each file to an output folder
 def build(tasks, files, path, rules):
-    for file_name, item in files.items():
+    for file_name, item in list(files.items()):
         rule = None
         file_path = item.path
         info = item.info
 
-        for k, v in rules.items():
+        for k, v in list(rules.items()):
             if fnmatch.fnmatch(file_path, k):
                 rule = v
                 break

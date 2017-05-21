@@ -32,7 +32,7 @@ import argparse, time, files, os, actions, tasks, unity
 def substitute_variables( args, *variables ):
 	argv = vars( args )
 
-	for k, v in argv.items():
+	for k, v in list(argv.items()):
 		if isinstance( v, str ):
 			for var in variables:
 				argv[k] = argv[k].replace( '[' + var + ']', argv[var] )
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     if not os.path.exists(args.output):
         os.makedirs(args.output)
 
-    print('--- Building [{0}] data package to [{1}] with [{2}] texture compression ---'.format(args.platform, args.output, args.compression) )
+    print(('--- Building [{0}] data package to [{1}] with [{2}] texture compression ---'.format(args.platform, args.output, args.compression) ))
     start = time.time()
 
     try:
@@ -156,6 +156,6 @@ if __name__ == "__main__":
         elif args.action == 'import':
             import_project(args, args.source, args.output)
     except ExportError as e:
-        print(e.message)
+        print((e.message))
 
-    print('--- {0} seconds ---'.format(int(time.time() - start)))
+    print(('--- {0} seconds ---'.format(int(time.time() - start))))

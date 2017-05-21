@@ -26,9 +26,9 @@
 
 import os, json, collections, shutil, actions, module, math, yaml, patcher
 
-from assets import Assets
-from asset_type import AssetType
-from scene import Scene
+from .assets import Assets
+from .asset_type import AssetType
+from .scene import Scene
 
 # Holds the material info
 class material:
@@ -38,7 +38,7 @@ class material:
         objects = yaml.objects_from_file(source)
         result = None
 
-        for k, v in objects.items():
+        for k, v in list(objects.items()):
             if k != 'Material':
                 continue
 
@@ -46,7 +46,7 @@ class material:
             properties = patcher.Patcher.patch(assets, result['m_SavedProperties'], patcher.MaterialPropertiesPatcher)
             result = patcher.Patcher.patch(assets, result, patcher.MaterialPatcher)
 
-            for k, v in properties.items():
+            for k, v in list(properties.items()):
                 result[k] = v
 
         # Save parsed scene to a JSON file
@@ -138,7 +138,7 @@ class ParticleSystemModule:
     def data(self):
         result = dict()
 
-        for k, v in self._parameters.items():
+        for k, v in list(self._parameters.items()):
             result[k] = v.data
 
         return result
@@ -265,11 +265,11 @@ class ParticleSystem:
 
     # Performs particle system parsing from an object
     def parse(self, object):
-        for k, v in object.items():
+        for k, v in list(object.items()):
             if not isinstance(v, dict):
                 continue
 
-            if not 'enabled' in v.keys():
+            if not 'enabled' in list(v.keys()):
                 continue
 
             if v['enabled'] == 0:
@@ -339,7 +339,7 @@ class ParticleSystem:
     def data(self):
         result = dict()
 
-        for k, v in self._modules.items():
+        for k, v in list(self._modules.items()):
             result[k] = v.data
 
         return result
@@ -352,8 +352,8 @@ class ParticleSystemParser:
         objects = yaml.objects_from_file(source)
         result  = None
 
-        for k, v in objects.items():
-            if not 'ParticleSystem' in v.keys():
+        for k, v in list(objects.items()):
+            if not 'ParticleSystem' in list(v.keys()):
                 continue
 
             result = ParticleSystem()
@@ -379,7 +379,7 @@ def import_scenes(assets, source, output):
     #    if item.file_name.find('Debug') == -1:
     #        continue
 
-        print('Importing scene {0}'.format(item.full_path))
+        print(('Importing scene {0}'.format(item.full_path)))
         Scene.convert(assets, paths.source, dest)
 
 # Import used materials
@@ -391,12 +391,12 @@ def import_materials(assets, source, output):
         if assets.should_strip(item):
             continue
 
-        print('Importing material {0}'.format(item.full_path))
+        print(('Importing material {0}'.format(item.full_path)))
         material.convert(assets, paths.source, dest)
 
 # Imports all used assets
 def import_assets(assets, source, output):
-    for uuid, item in assets.used_assets.items():
+    for uuid, item in list(assets.used_assets.items()):
         paths = item.format_paths(source, output)
         dest = os.path.join(output, assets.asset_identifier(item))
 
@@ -417,6 +417,6 @@ def import_prefabs(assets, source, output):
     #    if item.identifier != 'engine_fire':
     #        continue
 
-        print('Importing prefab {0}'.format(item.full_path))
+        print(('Importing prefab {0}'.format(item.full_path)))
         assets.use(item.uuid)
         Scene.convert(assets, paths.source, dest)
